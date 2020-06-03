@@ -28,7 +28,7 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
 	"dest" : vars.code
 }]]]></http:uri-params>
 		</http:request>
-		<logger level="INFO" doc:name="Logger" doc:id="80a91fe3-d4ec-4d93-a2b8-bf86b9cefede" message="#['United Logger']"/>
+		<logger level="INFO" doc:name="Logger" doc:id="80a91fe3-d4ec-4d93-a2b8-bf86b9cefede" message="#['United Default Logger']"/>
 	
 </flow>
 </mule>
