@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:american-flights-api="http://www.mulesoft.org/schema/mule/american-flights-api"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/american-flights-api http://www.mulesoft.org/schema/mule/american-flights-api/current/mule-american-flights-api.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="eb1f945f-6d4c-4c5e-aafe-8b3f5d91dc52" environment="SANDBOX" applicationName="wt8-2_apdev-flights-ws_solution" applicationVersion="1.0.0-SNAPSHOT"/>
+	<sub-flow name="setCode" doc:id="838d4696-3f1f-4266-a84a-d3c35f18e328" >
+		<set-variable value="#[message.attributes.queryParams.code default 'SFO']" doc:name="code" doc:id="08c06523-5add-4fc3-9787-4dca3968956f" variableName="code"/>
+	</sub-flow>
+	<flow name="getAmericanFlights" doc:id="b8e22ae6-08b9-4c4f-bf49-ee6be5ccf7bc" >
+		<http:listener doc:name="GET /american" doc:id="b4dbf1e9-3741-4e78-a2ba-f024d3f0dc7f" config-ref="HTTP_Listener_config" path="/american" allowedMethods="GET"/>
+		<flow-ref doc:name="setCode" doc:id="0d6956e1-a91f-4e90-87c3-9303133a3efb" name="setCode"/>
+		<american-flights-api:get-flights doc:name="Get flights" doc:id="ec4f41a1-8c5c-4b99-b286-4a68cae3838c" config-ref="American_Flights_API_Config" client-id="${american.client_id}" client-secret="${american.client_secret}" destination="#[vars.code]"/>
+		<json-logger:logger doc:name="Logger" doc:id="ebd70a30-ff20-483d-9307-b59455ef8d2d" config-ref="JSON_Logger_Config" message="#['American Logger']" tracePoint="FLOW"/>
+	
+</flow>
+	<flow name="getUnitedFlights" doc:id="a7143971-8161-4a1f-9e80-6f3d028e0a04" >
+		<http:listener doc:name="GET /united" doc:id="3a49ee5f-75e4-484c-8ce9-c8f9b005c48e" config-ref="HTTP_Listener_config" path="/united" allowedMethods="GET"/>
+		<flow-ref doc:name="setCode" doc:id="9ff0bea9-f9b3-4880-b5d0-b1e2c6859fab" name="setCode"/>
+		<http:request method="GET" doc:name="Get flights" doc:id="28290246-8171-4a5c-a8ff-6e2e3be1eed4" config-ref="HTTP_Request_config_training" path="/united/flights/{dest}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"dest" : vars.code
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="80a91fe3-d4ec-4d93-a2b8-bf86b9cefede" message="#['United Logger']"/>
+	
+</flow>
+</mule>
